@@ -31,11 +31,10 @@ def _migrate_tracking(cr):
 
 def _migrate_pack_operation(env):
     env.cr.execute(
-        "select o.id, o.%(lot_id)s, p.state, sum(q.qty) "
+        "select o.id, o.%(lot_id)s, p.state, o.product_qty "
         "from stock_pack_operation o "
-        "join stock_quant q on q.lot_id=o.%(lot_id)s "
         "join stock_picking p on o.picking_id=p.id "
-        "group by o.id, o.%(lot_id)s, p.state",
+        "where o.%(lot_id)s is not NULL ",
         {'lot_id': AsIs(openupgrade.get_legacy_name('lot_id'))})
     for operation_id, lot_id, state, qty in env.cr.fetchall():
         env['stock.pack.operation.lot'].create({
